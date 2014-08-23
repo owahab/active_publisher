@@ -1,0 +1,1 @@
+../../../../lib/generators/active_publisher/templates/active_publisher.rb

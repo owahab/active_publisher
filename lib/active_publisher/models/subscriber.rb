@@ -1,4 +1,4 @@
-require 'active_publisher/proxies/notification'
+require 'active_publisher/notification_proxy'
 
 module ActivePublisher
   module Models
@@ -42,7 +42,7 @@ module ActivePublisher
       
       def notifications
         # Return our proxy
-        ActivePublisher::Proxies::Notification.new(self)
+        ActivePublisher::NotificationProxy.new(self)
       end
       
       def receive_notification notification

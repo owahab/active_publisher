@@ -5,10 +5,13 @@ require 'active_publisher/engine'
 require 'active_publisher/redis'
 
 module ActivePublisher
+  @@redis = nil
+  
   def self.redis=(connection)
     @@redis = ActivePublisher::Redis.new(connection)
   end
   def self.redis
+    raise ActivePublisher::UnableToConnect unless @@redis
     @@redis
   end
   

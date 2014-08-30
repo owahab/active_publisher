@@ -31,7 +31,7 @@ describe Subscriber do
         describe ".notifications" do
           let!(:notify) { publisher.publish "test_event", { foo: :bar } }
           
-          it { expect(subject.notifications).to be_kind_of ActivePublisher::Proxies::Notification }
+          it { expect(subject.notifications).to be_kind_of ActivePublisher::NotificationProxy }
           it { expect(subject.notifications.count).to eq 1 }
         end
       end
@@ -45,7 +45,7 @@ describe Subscriber do
       describe ".notifications" do
         let!(:notify) { ActivePublisher.publish_to_topic "test_topic", { foo: :bar } }
       
-        it { expect(subject.notifications).to be_kind_of ActivePublisher::Proxies::Notification }
+        it { expect(subject.notifications).to be_kind_of ActivePublisher::NotificationProxy }
         it { expect(subject.notifications.count).to eq 1 }
       end
     end
@@ -80,6 +80,6 @@ describe Subscriber do
   end
   
   describe ".notifications" do
-    it { expect(subject.notifications).to be_kind_of ActivePublisher::Proxies::Notification }
+    it { expect(subject.notifications).to be_kind_of ActivePublisher::NotificationProxy }
   end
 end

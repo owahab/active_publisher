@@ -11,7 +11,7 @@ module ActivePublisher
       me.id = id.split(':').last
       me.publisher = ActivePublisher.load_object_by_key(n["publisher"])
       me.event = n["event"]
-      me.payload = JSON.parse(n["payload"])
+      me.payload = JSON.parse(n["payload"]) if n["payload"].present?
       me
     end
   end

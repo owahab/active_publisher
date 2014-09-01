@@ -10,7 +10,6 @@ module ActivePublisher
     end
   
     def find id
-      Rails.logger.info("Finding notification id: #{id}")
       key = @subscriber.active_publisher_key("notification:#{id}")
       ActivePublisher::Notification.find(key)
     end
@@ -25,6 +24,14 @@ module ActivePublisher
   
     def all
       self.refresh.messages
+    end
+  
+    def to_a
+      list = []
+      self.refresh.messages.each do |id|
+        list << self.find(id)
+      end
+      list
     end
   
     def unread

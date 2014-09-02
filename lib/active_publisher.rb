@@ -15,7 +15,6 @@ module ActivePublisher
   #      or `Redis::Namespace`.
   #   6. An Hash of a redis connection {:host => 'localhost', :port => 6379, :db => 0}
   def redis=(server)
-    puts "Setting Redis to: #{server}"
     case server
     when String
       if server =~ /redis\:\/\//
@@ -40,10 +39,8 @@ module ActivePublisher
   # Returns the current Redis connection. If none has been created, will
   # create a new one.
   def redis
-    puts "Redis 1: #{@redis}"
     return @redis if @redis
     self.redis = Redis.respond_to?(:connect) ? Redis.connect : "localhost:6379"
-    puts "Redis 2: #{self.redis}"
     self.redis
   end  
 

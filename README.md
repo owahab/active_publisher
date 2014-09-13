@@ -2,6 +2,10 @@
 
 ActivePublisher brings PubSub to Rails models and controllers.
 
+## Status
+
+[![Build Status](https://travis-ci.org/owahab/active_publisher.svg?branch=master)](https://travis-ci.org/owahab/active_publisher)
+
 ## Installation
 
 Add this line to your application's Gemfile:

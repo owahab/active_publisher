@@ -1,4 +1,6 @@
 ENV["RAILS_ENV"] = "test"
+require 'coveralls'
+Coveralls.wear!
 
 # add dummy to the load path. now we're also at the root of the fake rails app.
 app_path = File.expand_path("../dummy",  __FILE__)

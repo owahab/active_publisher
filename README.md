@@ -5,6 +5,7 @@ ActivePublisher brings PubSub to Rails models and controllers.
 ## Status
 
 [![Build Status](https://travis-ci.org/owahab/active_publisher.svg?branch=master)](https://travis-ci.org/owahab/active_publisher)
+[![Coverage Status](https://coveralls.io/repos/owahab/active_publisher/badge.png?branch=master)](https://coveralls.io/r/owahab/active_publisher?branch=master)
 
 ## Installation
 

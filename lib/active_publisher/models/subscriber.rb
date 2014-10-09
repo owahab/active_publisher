@@ -5,15 +5,17 @@ module ActivePublisher
     module Subscriber
       # Marks the current object as +subscriber+ to the given +publisher+.
       # +publisher+ should be declared as a publisher using +acts_as_publisher+ otherwise throws exception.
-      def subscribe publisher
+      def subscribe publisher, *events
         if publisher.class == String
-          ActivePublisher.redis.sadd(ActivePublisher.key(['topics', publisher]), self.active_publisher_key)
-          ActivePublisher.redis.sadd(self.active_publisher_key('subscriptions'), ActivePublisher.key(['topics', publisher]))
+          ActivePublisher.redis.sadd(ActivePublisher.key(['topics', publisher]), self.active_publisher_key(''))
+          ActivePublisher.redis.sadd(self.active_publisher_key('', 'subscriptions'), ActivePublisher.key(['topics', publisher]))
         elsif publisher.is_a? Object
           raise ActivePublisher::InvalidPublisher unless publisher.respond_to?(:publish)
           raise ActivePublisher::UnpresistedObject unless publisher.id.present?
-          ActivePublisher.redis.sadd(publisher.active_publisher_key('subscribers'), self.active_publisher_key)
-          ActivePublisher.redis.sadd(self.active_publisher_key('subscriptions'), publisher.active_publisher_key)
+          events.each do |event|
+            ActivePublisher.redis.sadd(publisher.active_publisher_key(event, 'subscribers'), self.active_publisher_key(event))
+            return ActivePublisher.redis.sadd(self.active_publisher_key(event, 'subscriptions'), publisher.active_publisher_key(event))
+          end
         else
           raise ActivePublisher::InvalidPublisher
         end
@@ -21,22 +23,24 @@ module ActivePublisher
   
       # Removes +subscriber+ from the given +publisher+ +subscribers+.
       # +publisher+ should be declared as a publisher using +acts_as_publisher+ otherwise throws exception.
-      def unsubscribe publisher
+      def unsubscribe publisher, *events
         if publisher.class == String
-          ActivePublisher.redis.srem(ActivePublisher.key(['topics', publisher]), self.active_publisher_key)
-          ActivePublisher.redis.srem(self.active_publisher_key('subscriptions'), ActivePublisher.key(['topics', publisher]))
+          ActivePublisher.redis.srem(ActivePublisher.key(['topics', publisher]), self.active_publisher_key(''))
+          ActivePublisher.redis.srem(self.active_publisher_key('', 'subscriptions'), ActivePublisher.key(['topics', publisher]))
         elsif publisher.is_a? Object
           raise ActivePublisher::InvalidPublisher unless publisher.respond_to?(:publish)
           raise ActivePublisher::UnpresistedObject unless publisher.id.present?
-          ActivePublisher.redis.srem(publisher.active_publisher_key('subscribers'), self.active_publisher_key)
-          ActivePublisher.redis.srem(self.active_publisher_key('subscriptions'), publisher.active_publisher_key)
+          events.each do |event|
+            ActivePublisher.redis.srem(publisher.active_publisher_key(event, 'subscribers'), self.active_publisher_key(event))
+            return ActivePublisher.redis.srem(self.active_publisher_key(event, 'subscriptions'), publisher.active_publisher_key(event))
+          end
         else
           raise ActivePublisher::InvalidPublisher
         end
       end
       
-      def subscriptions
-        ActivePublisher.redis.smembers(self.active_publisher_key('subscriptions'))
+      def subscriptions *events
+        ActivePublisher.redis.sunion(events.map {|event| self.active_publisher_key(event, 'subscriptions')}.join(' '))
       end
       
       
@@ -46,9 +50,9 @@ module ActivePublisher
       end
       
       def receive_notification notification
-        subscriber_key = self.active_publisher_key('notifications')
-        id = ActivePublisher.redis.incr(self.active_publisher_key('notifications', 'sequence'))
-        notification_key = self.active_publisher_key('notification', id)
+        subscriber_key = self.active_publisher_key('', 'notifications')
+        id = ActivePublisher.redis.incr(self.active_publisher_key('', 'notifications', 'sequence'))
+        notification_key = self.active_publisher_key('', 'notification', id)
         # Notify them all
         ActivePublisher.redis.mapped_hmset(notification_key, notification)
         ActivePublisher.redis.sadd(subscriber_key, id)
@@ -59,12 +63,13 @@ module ActivePublisher
         end
       end
       
-      def active_publisher_key *suffix
+      def active_publisher_key event, *suffix
         key = []
         key << 'subscriber'
         key << self.class.to_s.downcase
         key << self.id
         key << [suffix].flatten! if suffix
+        key << event.to_s if !event.nil? && !event.empty?
         ActivePublisher.key(key)
       end
     end

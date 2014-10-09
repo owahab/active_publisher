@@ -11,25 +11,28 @@ module ActivePublisher
         
       end
   
-      def publish event, payload = {}
-        notification = { publisher: self.active_publisher_key, event: event, payload: payload.to_json }
-        # Get all subscribers
-        self.subscribers.each do |key|
-          subscriber = ActivePublisher.load_object_by_key(key)
-          subscriber.receive_notification(notification)
+      def publish events, type, payload = {}
+        events.each do |event|
+          notification = { publisher: self.active_publisher_key(event), type: type, payload: payload.to_json}
+          # Get all subscribers
+          self.subscribers(event).uniq.each do |key|
+            subscriber = ActivePublisher.load_object_by_key(key)
+            subscriber.receive_notification(notification)
+          end
         end
       end
       
-      def subscribers
-        ActivePublisher.redis.smembers(self.active_publisher_key('subscribers'))
+      def subscribers *events
+        ActivePublisher.redis.sunion(events.map {|event| self.active_publisher_key(event, 'subscribers')}.join(' '))
       end
       
-      def active_publisher_key *suffix
+      def active_publisher_key event, *suffix
         key = []
         key << 'publisher'
         key << self.class.to_s.downcase
         key << self.id
         key << [suffix].flatten! if suffix
+        key << event.to_s if !event.nil? && !event.empty?
         ActivePublisher.key(key)
       end
     end

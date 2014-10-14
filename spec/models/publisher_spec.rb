@@ -13,17 +13,17 @@ describe Publisher do
     let(:subscriber) { FactoryGirl.create(:subscriber) }
     let(:publisher) { FactoryGirl.create(:publisher) }
     
-    it { expect(subject.subscribers).to be_kind_of Array }
-    it { expect(subject.subscribers.count).to eq 0 }
+    it { expect(subject.subscribers(:any)).to be_kind_of Array }
+    it { expect(subject.subscribers(:any).count).to eq 0 }
     
     context "with subscribers" do
-      let!(:subscription) { subscriber.subscribe publisher }
-      it { expect(publisher.subscribers.count).to eq 1 }
-      it { expect(publisher.subscribers).to include subscriber.active_publisher_key }
+      let!(:subscription) { subscriber.subscribe(publisher, :any) }
+      it { expect(publisher.subscribers(:any).count).to eq 1 }
+      it { expect(publisher.subscribers(:any)).to include subscriber.active_publisher_key(:any) }
 
       describe "recieve notifications" do
-        let!(:notification) { publisher.publish(:test) }
-        it { expect(subscriber.notifications.count).to eq 1 }
+        let!(:notification) { publisher.publish([:any], :test) }
+        it { expect(subscriber.notifications.all.count).to eq 1 }
       end
     end
     

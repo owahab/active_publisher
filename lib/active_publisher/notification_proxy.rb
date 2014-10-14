@@ -10,7 +10,7 @@ module ActivePublisher
     end
   
     def find id
-      key = @subscriber.active_publisher_key("notification:#{id}")
+      key = @subscriber.active_publisher_key('', "notification:#{id}")
       ActivePublisher::Notification.find(key)
     end
   
@@ -40,7 +40,7 @@ module ActivePublisher
   
     def refresh
       # Get notification ids
-      @messages = ActivePublisher.redis.smembers(@subscriber.active_publisher_key('notifications'))
+      @messages = ActivePublisher.redis.smembers(@subscriber.active_publisher_key('', 'notifications'))
       self
     end
 

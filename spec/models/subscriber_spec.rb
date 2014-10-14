@@ -29,7 +29,7 @@ describe Subscriber do
         it { expect(publisher.subscribers(:any)).to include subject.active_publisher_key(:any) }
         
         describe ".notifications" do
-          let!(:notify) { publisher.publish([:any], "test_event", { foo: :bar }) }
+          let!(:notify) { publisher.publish([:any], { foo: :bar }) }
           
           it { expect(subject.notifications).to be_kind_of ActivePublisher::NotificationProxy }
           it { expect(subject.notifications.count).to eq 1 }

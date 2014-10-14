@@ -11,9 +11,9 @@ module ActivePublisher
         
       end
   
-      def publish events, type, payload = {}
+      def publish events, payload = {}
         events.each do |event|
-          notification = { publisher: self.active_publisher_key(event), type: type, payload: payload.to_json}
+          notification = { publisher: self.active_publisher_key(event), payload: payload.to_json}
           # Get all subscribers
           self.subscribers(event).uniq.each do |key|
             subscriber = ActivePublisher.load_object_by_key(key)

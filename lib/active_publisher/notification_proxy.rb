@@ -35,13 +35,19 @@ module ActivePublisher
     end
   
     def unread
-      ActivePublisher.redis.unread_messages(subscriber)
+      ActivePublisher.redis.smembers(@subscriber.active_publisher_key('', 'notifications', 'unread'))
     end
   
     def refresh
       # Get notification ids
       @messages = ActivePublisher.redis.smembers(@subscriber.active_publisher_key('', 'notifications'))
       self
+    end
+
+    def mark_read
+      @messages.each do |message|
+        message
+      end
     end
 
     protected

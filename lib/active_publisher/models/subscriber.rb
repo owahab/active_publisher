@@ -48,6 +48,11 @@ module ActivePublisher
         # Return our proxy
         ActivePublisher::NotificationProxy.new(self)
       end
+
+      def mark_notifications_read
+        subscriber_key = self.active_publisher_key('', 'notifications', 'unread')
+        ActivePublisher.redis.del(subscriber_key)
+      end
       
       def receive_notification notification
         subscriber_key = self.active_publisher_key('', 'notifications')
@@ -56,6 +61,7 @@ module ActivePublisher
         # Notify them all
         ActivePublisher.redis.mapped_hmset(notification_key, notification)
         ActivePublisher.redis.sadd(subscriber_key, id)
+        ActivePublisher.redis.sadd(self.active_publisher_key('', 'notifications', 'unread'), id)
         begin
           self.deliver_notification id
         rescue ::NoMethodError
